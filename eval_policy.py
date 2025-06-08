@@ -18,7 +18,7 @@ Usage:
     python eval_policy.py \
         --robot_type=so101 \
         --policy_path=outputs/train/so101_pick_and_place_home_fix_video_weights/checkpoints/020000/pretrained_model \
-        --num_episodes=10 \
+        --num_episodes=2 \
         --max_episode_steps=900 \
         --task_description="Grip a straight scissor and put it in the box." \
         --record_episodes
@@ -302,6 +302,12 @@ class PolicyEvaluator:
         if hasattr(self.policy, 'reset'):
             self.policy.reset()
         
+        # Setup video recording
+        video_writers = {}
+        if self.eval_config.record_episodes and self.eval_config.record_videos:
+            episode_dir = self.output_dir / f"episode_{episode_idx:03d}"
+            episode_dir.mkdir(parents=True, exist_ok=True)
+        
         start_time = time.time()
         
         for step in tqdm(range(self.eval_config.max_episode_steps), 
@@ -319,6 +325,10 @@ class PolicyEvaluator:
             observation = self.robot.capture_observation()
             episode_data["observations"].append(observation)
             episode_data["timestamps"].append(time.time() - start_time)
+            
+            # Record video frames
+            if self.eval_config.record_episodes and self.eval_config.record_videos:
+                self._record_video_frame(observation, video_writers, episode_dir, step)
             
             # Preprocess for policy
             processed_obs = self.preprocess_observation(observation)
@@ -346,6 +356,11 @@ class PolicyEvaluator:
             
             episode_data["num_steps"] = step + 1
         
+        # Close video writers
+        if self.eval_config.record_episodes and self.eval_config.record_videos:
+            self._close_video_writers(video_writers)
+            self.logger.info(f"Video saved to {episode_dir}")
+        
         # Evaluate success
         episode_data["success"] = self._get_manual_success_rating()
         
@@ -361,6 +376,48 @@ class PolicyEvaluator:
         self.move_to_initial_position()
         
         return episode_data
+
+    def _record_video_frame(self, observation, video_writers, episode_dir, step):
+        """Record a single frame for each camera to video files."""
+        for key, value in observation.items():
+            if "image" in key:
+                # Convert to numpy if needed
+                if isinstance(value, torch.Tensor):
+                    frame = value.cpu().numpy()
+                else:
+                    frame = value
+                
+                # Convert to uint8 if needed
+                if frame.dtype != np.uint8:
+                    if frame.max() <= 1.0:
+                        frame = (frame * 255).astype(np.uint8)
+                    else:
+                        frame = frame.astype(np.uint8)
+                
+                # Handle different formats (C,H,W) -> (H,W,C)
+                if frame.ndim == 3 and frame.shape[0] in [1, 3, 4]:
+                    frame = frame.transpose(1, 2, 0)
+                
+                # Convert RGB to BGR for OpenCV
+                if frame.shape[-1] == 3:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                
+                # Initialize video writer for this camera if not exists
+                if key not in video_writers:
+                    height, width = frame.shape[:2]
+                    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                    video_path = episode_dir / f"{key.replace('.', '_')}.mp4"
+                    video_writers[key] = cv2.VideoWriter(
+                        str(video_path), fourcc, self.eval_config.fps, (width, height)
+                    )
+                
+                # Write frame
+                video_writers[key].write(frame)
+
+    def _close_video_writers(self, video_writers):
+        """Close all video writers and release resources."""
+        for writer in video_writers.values():
+            writer.release()
 
     def _check_manual_early_stop(self) -> bool:
         """Check for manual early stop keypress (non-blocking)."""
