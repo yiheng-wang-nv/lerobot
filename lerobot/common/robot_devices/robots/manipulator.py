@@ -260,8 +260,10 @@ class ManipulatorRobot:
             self.set_koch_robot_preset()
         elif self.robot_type == "aloha":
             self.set_aloha_robot_preset()
-        elif self.robot_type in ["so100", "so101", "moss", "lekiwi"]:
+        elif self.robot_type in ["so100", "moss", "lekiwi"]:
             self.set_so100_robot_preset()
+        elif self.robot_type == "so101":
+            self.set_so101_robot_preset()
 
         # Enable torque on all motors of the follower arms
         for name in self.follower_arms:
@@ -441,6 +443,16 @@ class ManipulatorRobot:
             # the motors. Note: this configuration is not in the official STS3215 Memory Table
             self.follower_arms[name].write("Maximum_Acceleration", 254)
             self.follower_arms[name].write("Acceleration", 254)
+
+    def set_so101_robot_preset(self):
+        for name in self.follower_arms:
+            self.follower_arms[name].write("Mode", 0)
+            self.follower_arms[name].write("P_Coefficient", 8)
+            self.follower_arms[name].write("I_Coefficient", 0)     
+            self.follower_arms[name].write("D_Coefficient", 32)
+            self.follower_arms[name].write("Lock", 0)
+            self.follower_arms[name].write("Maximum_Acceleration", 127)
+            self.follower_arms[name].write("Acceleration", 127)
 
     def teleop_step(
         self, record_data=False

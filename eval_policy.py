@@ -17,10 +17,10 @@ Usage:
     sudo chmod 666 /dev/ttyACM0
     python eval_policy.py \
         --robot_type=so101 \
-        --policy_path=outputs/train/so101_pick_and_place_home_fix_video_weights/checkpoints/020000/pretrained_model \
-        --num_episodes=2 \
+        --policy_path=outputs/train/so101_tweezer_act/checkpoints/060000/pretrained_model \
+        --num_episodes=10 \
         --max_episode_steps=900 \
-        --task_description="Grip a straight scissor and put it in the box." \
+        --task_description="Grip a tweezer and put it in the box." \
         --record_episodes
 """
 
@@ -176,7 +176,7 @@ class PolicyEvaluator:
             return
         
         # Hard-coded SO101 initial position
-        target_position = [6, 189, 181, 67, 91, 0]
+        target_position = [-8.261719, 194.9414, 186.15234, 60.996094, 80.5957, -7.575758]
         
         # Check if robot is already at initial position
         try:
