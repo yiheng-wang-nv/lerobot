@@ -14,13 +14,13 @@ Leader arms are automatically disabled to avoid unnecessary connections.
 
 Usage:
     # Evaluate policy on SO101 robot
-    sudo chmod 666 /dev/ttyACM0
+    sudo chmod 666 /dev/ttyACM1
     python eval_policy.py \
         --robot_type=so101 \
-        --policy_path=outputs/train/so101_tweezer_act/checkpoints/060000/pretrained_model \
-        --num_episodes=10 \
+        --policy_path=outputs/train/so101_scissors_act/checkpoints/060000/pretrained_model \
+        --num_episodes=2 \
         --max_episode_steps=900 \
-        --task_description="Grip a tweezer and put it in the box." \
+        --task_description="Grip a straight scissor and put it in the box." \
         --record_episodes
 """
 
