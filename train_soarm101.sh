@@ -20,11 +20,11 @@ python lerobot/scripts/control_robot.py \
   --control.type=record \
   --control.fps=30 \
   --control.single_task="Grip a straight scissor and put it in the box." \
-  --control.repo_id=${HF_USER}/eval_so101_scissors_last \
+  --control.repo_id=${HF_USER}/eval_so101_scissors_10000 \
   --control.tags='["so101"]' \
   --control.warmup_time_s=5 \
   --control.episode_time_s=30 \
   --control.reset_time_s=30 \
   --control.num_episodes=10 \
   --control.push_to_hub=false \
-  --control.policy.path=outputs/train/so101_scissors_act/checkpoints/last/pretrained_model
+  --control.policy.path=outputs/train/so101_scissors_act_save_5000/checkpoints/010000/pretrained_model
