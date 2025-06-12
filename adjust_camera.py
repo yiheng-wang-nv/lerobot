@@ -1,6 +1,6 @@
 import cv2
 
-cap = cv2.VideoCapture(2)  # 0 is usually the default camera
+cap = cv2.VideoCapture(0)  # 0 is usually the default camera
 
 while True:
     ret, frame = cap.read()
