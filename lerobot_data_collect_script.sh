@@ -6,7 +6,7 @@ python lerobot/scripts/find_motors_bus_port.py
 
 # open ports
 HF_USER=Venn
-sudo chmod 666 /dev/ttyACM1
+sudo chmod 666 /dev/ttyACM2
 sudo chmod 666 /dev/ttyACM0
 
 # find cameras
@@ -34,7 +34,7 @@ python lerobot/scripts/control_robot.py \
   --control.warmup_time_s=5 \
   --control.episode_time_s=60 \
   --control.reset_time_s=60 \
-  --control.num_episodes=200 \
+  --control.num_episodes=250 \
   --control.display_data=true \
   --control.push_to_hub=false \
   --control.resume=true

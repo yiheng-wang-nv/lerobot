@@ -332,12 +332,24 @@ class OpenCVCamera:
         # needs to be re-created.
         self.camera = cv2.VideoCapture(camera_idx, backend)
 
+        # Optimized buffer size: 2-3 frames provides good balance between latency and reliability
+        # Buffer size of 1 can cause frame drops and sync issues
+        # Buffer size too large can cause stuttering due to frame accumulation
+        self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 2)
+
         if self.fps is not None:
             self.camera.set(cv2.CAP_PROP_FPS, self.fps)
         if self.capture_width is not None:
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.capture_width)
         if self.capture_height is not None:
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.capture_height)
+
+        # Additional optimizations for better performance
+        if not self.mock:
+            # Disable auto-exposure and auto-white-balance for consistent performance
+            self.camera.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # Manual exposure mode
+            # Set fourcc to MJPG for better USB bandwidth utilization
+            self.camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
         actual_fps = self.camera.get(cv2.CAP_PROP_FPS)
         actual_width = self.camera.get(cv2.CAP_PROP_FRAME_WIDTH)

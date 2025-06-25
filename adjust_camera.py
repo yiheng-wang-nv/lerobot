@@ -1,6 +1,9 @@
 import cv2
 
-cap = cv2.VideoCapture(2)  # 0 is usually the default camera
+cap = cv2.VideoCapture(0)  # 0 is usually the default camera
+
+cv2.namedWindow('Camera Feed', cv2.WINDOW_NORMAL)  # Allow window resizing
+cv2.resizeWindow('Camera Feed', 640, 480)          # Set initial window size
 
 while True:
     ret, frame = cap.read()
